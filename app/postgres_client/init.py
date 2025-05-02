@@ -1,4 +1,4 @@
-from db.session import engine, Base
+from postgres_client.session import engine, Base
 #import models
 
 def init():

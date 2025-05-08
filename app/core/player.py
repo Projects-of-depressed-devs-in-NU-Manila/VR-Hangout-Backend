@@ -2,9 +2,9 @@ from app.core.vector import Vector3
 from fastapi import WebSocket
 
 
-class Client:
+class Player:
     websocket: WebSocket
-    user_id: str
+    id: str
     current_world_id: str
-    position: Vector3  
-    rotation: Vector3  
+    position: Vector3  = Vector3()
+    rotation: Vector3  = Vector3()

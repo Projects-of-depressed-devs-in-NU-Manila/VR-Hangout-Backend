@@ -1,30 +1,44 @@
 from fastapi import APIRouter, WebSocket, Query, WebSocketDisconnect, HTTPException
-from app.services.worlds import WorldService 
+from app.services.worlds.worlds import WorldService 
 
-import json
+from app.core.vector import Vector3
+
 
 import traceback
 
-router = APIRouter(prefix="/game", tags="Game Websocket")
+router = APIRouter(prefix="/game", tags=["Game Websocket"])
 
 world_service = WorldService()
 
 @router.websocket("/ws")
-async def handler(websocket: WebSocket, user_id:str = Query(None)):
+async def handler(websocket: WebSocket, player_id:str = Query(None)):
+    if player_id == None:
+        websocket.close()
+        raise HTTPException(501, {"error": "Please Provide a valid player id"})
+
     await websocket.accept()
-    await world_service.connect(user_id=user_id, websocket=websocket)
+    player = await world_service.connect(player_id=player_id, websocket=websocket)
 
     while True:
         try:
             data = await websocket.receive_json()
 
-            await world_service.broadcast(user_id, data)
+            match data["type"]:
+                case "playerMove":
+                    player.position =  Vector3(**data["position"])
+
+ 
+            await world_service.broadcast(player_id, data)
         except WebSocketDisconnect as e:
-            await world_service.disconnect(user_id)
             break
         except Exception as e:
             print(traceback.format_exc())
             print(e)
             raise HTTPException(500, {"error": "Internal Server Error"})
+ 
+    await world_service.disconnect(player_id)
+    print("Current Players: ", len(world_service.players))
+
+    
 
 

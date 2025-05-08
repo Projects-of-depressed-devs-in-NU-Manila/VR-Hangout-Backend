@@ -1,4 +1,7 @@
-class Vector3:
-    x: int = 0
-    y: int = 0
-    z: int = 0
+from pydantic import BaseModel
+
+class Vector3(BaseModel):
+    x: float = 0
+    y: float = 0
+    z: float = 0
+

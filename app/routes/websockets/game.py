@@ -13,8 +13,12 @@ world_service = WorldService()
 @router.websocket("/ws")
 async def handler(websocket: WebSocket, player_id:str = Query(None)):
     if player_id == None:
-        websocket.close()
+        await websocket.close()
         raise HTTPException(501, {"error": "Please Provide a valid player id"})
+    
+    if player_id in world_service.players.keys():
+        await websocket.close()
+        raise HTTPException(401, {"error": "Player is playing already"})
 
     await websocket.accept()
     player = await world_service.connect(player_id=player_id, websocket=websocket)

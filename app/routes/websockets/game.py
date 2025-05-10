@@ -1,5 +1,5 @@
 from fastapi import APIRouter, WebSocket, Query, WebSocketDisconnect, HTTPException
-from app.services.worlds.worlds import WorldService 
+from app.services.connection.connection import ConnectionService 
 
 from app.core.vector import Vector3
 
@@ -8,7 +8,7 @@ import traceback
 
 router = APIRouter(prefix="/game", tags=["Game Websocket"])
 
-world_service = WorldService()
+world_service = ConnectionService()
 
 @router.websocket("/ws")
 async def handler(websocket: WebSocket, player_id:str = Query(None)):

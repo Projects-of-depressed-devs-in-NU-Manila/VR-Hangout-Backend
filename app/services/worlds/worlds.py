@@ -29,7 +29,7 @@ class WorldService:
         await self.broadcast(player_id, create_connection_message(self.players[player_id])) 
 
         return player
-    
+     
     async def disconnect(self, player_id: str):
         await self.broadcast(player_id, create_disconection_message(player_id))
         player = self.players[player_id]

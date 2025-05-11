@@ -23,25 +23,26 @@ async def handler(websocket: WebSocket, player_id:str = Query(None)):
     await websocket.accept()
     player = await connection_service.connect(player_id=player_id, websocket=websocket)
 
-    while True:
-        try:
-            data = await websocket.receive_json()
+    try:
+        while True:
+                data = await websocket.receive_json()
 
-            match data["type"]:
-                case "playerMove":
-                    player.position =  Vector3(**data["position"])
+                match data["type"]:
+                    case "playerMove":
+                        player.position =  Vector3(**data["position"])
 
- 
-            await connection_service.broadcast(player_id, data)
-        except WebSocketDisconnect as e:
-            break
-        except Exception as e:
-            print(traceback.format_exc())
-            print(e)
-            raise HTTPException(500, {"error": "Internal Server Error"})
- 
-    await connection_service.disconnect(player_id)
-    print("Current Players: ", len(connection_service.players))
+                await connection_service.broadcast(player_id, data)
+    except WebSocketDisconnect as e:
+        ...
+    except Exception as e:
+        print(traceback.format_exc())
+        print(e)
+        raise HTTPException(500, {"error": "Internal Server Error"})
+    finally:
+        await connection_service.disconnect(player_id)
+        print("Current Players: ", len(connection_service.players))
+        await websocket.close()
+
 
     
 

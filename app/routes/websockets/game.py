@@ -8,7 +8,7 @@ import traceback
 
 router = APIRouter(prefix="/game", tags=["Game Websocket"])
 
-world_service = ConnectionService()
+connection_service = ConnectionService()
 
 @router.websocket("/ws")
 async def handler(websocket: WebSocket, player_id:str = Query(None)):
@@ -16,12 +16,12 @@ async def handler(websocket: WebSocket, player_id:str = Query(None)):
         await websocket.close()
         raise HTTPException(501, {"error": "Please Provide a valid player id"})
     
-    if player_id in world_service.players.keys():
+    if player_id in connection_service.players.keys():
         await websocket.close()
         raise HTTPException(401, {"error": "Player is playing already"})
 
     await websocket.accept()
-    player = await world_service.connect(player_id=player_id, websocket=websocket)
+    player = await connection_service.connect(player_id=player_id, websocket=websocket)
 
     while True:
         try:
@@ -32,7 +32,7 @@ async def handler(websocket: WebSocket, player_id:str = Query(None)):
                     player.position =  Vector3(**data["position"])
 
  
-            await world_service.broadcast(player_id, data)
+            await connection_service.broadcast(player_id, data)
         except WebSocketDisconnect as e:
             break
         except Exception as e:
@@ -40,8 +40,8 @@ async def handler(websocket: WebSocket, player_id:str = Query(None)):
             print(e)
             raise HTTPException(500, {"error": "Internal Server Error"})
  
-    await world_service.disconnect(player_id)
-    print("Current Players: ", len(world_service.players))
+    await connection_service.disconnect(player_id)
+    print("Current Players: ", len(connection_service.players))
 
     
 

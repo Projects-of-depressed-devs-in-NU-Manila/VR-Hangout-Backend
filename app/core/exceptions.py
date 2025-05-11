@@ -14,3 +14,8 @@ def catch_exceptions():
                 raise HTTPException(status_code=500, detail={"error": "Internal Server Error"})
         return wrapper
     return decorator
+
+
+class AlreadyExists(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)

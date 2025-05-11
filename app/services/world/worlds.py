@@ -1,21 +1,28 @@
-from app.redis_client.models.world import World
-from app.redis_client.models.world_object import WorldObject 
-from app.redis_client.models.redis_vector import Vector3 
+from app.models.worlds import World
+from app.models.world_objects import WorldObject
 from app.core.id_gen import generate_id
+
+from app.database.session import create_postgres_session
+
+from sqlalchemy.orm import Session
 
 
 class WorldService():
+
     @staticmethod
+    def create_default_world(session: Session, player_id: str):
+        world_id = generate_id(World, World.world_id)
+        world = World(world_id=world_id, owner_player_id=player_id)
+        session.add(world)
+        session.flush()
 
-    def create_default_world(player_id: str):
-        # position = Vector3(x=0.0, y=0.0, z=0.0)
-        # rotation = Vector3(x=0.0, y=0.0, z=0.0)
-        # scale = Vector3(x=4.0, y=4.0, z=4.0)
+        world_object_id = generate_id(WorldObject, WorldObject.world_object_id)
+        object_id = "plane001"
+        scale = [4.0, 4.0, 4.0]
 
-        id = generate_id()
-        # obj = WorldObject(object_id="plane001", position=position, rotation=rotation, scale=scale)
-        world = World(world_id=id, owner_player_id=player_id, objects=[])
+        plane = WorldObject(world_object_id=world_object_id, world_id=world_id, object_id=object_id, scale=scale, position=[0.0, 0.0, 0.0], rotation=[0.0, 0.0, 0.0])
+        session.add(plane)
+        session.flush()
 
-        world.save()
-
-        return id
+        return world_object_id
+    

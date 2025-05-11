@@ -1,4 +1,4 @@
-from app.core.player import Player
+from app.services.connection.player import Player
 import json
 
 def create_connection_message(player: Player):

@@ -29,7 +29,7 @@ async def handler(websocket: WebSocket, player_id:str = Query(None)):
         world = WorldService.get_world_by_player_id(session, player_id)
 
     player = await connection_service.add(player_id, websocket, str(world.world_id))
-
+ 
     try:
         while True:
                 data = await websocket.receive_json()
@@ -49,8 +49,3 @@ async def handler(websocket: WebSocket, player_id:str = Query(None)):
         await connection_service.remove(player_id)
         print("Current Players: ", len(connection_service.players))
         await websocket.close()
- 
-
-    
-
-

@@ -2,6 +2,7 @@ from fastapi import APIRouter, WebSocket, Query, WebSocketDisconnect, HTTPExcept
 from app.services.connection.connection import ConnectionService 
 from app.services.world.worlds import WorldService, WorldObject, World
 from app.database.session import create_postgres_session
+from app.services.connection.message_types.world_data import WorldData 
 
 from app.core.vector import Vector3
 
@@ -25,8 +26,13 @@ async def handler(websocket: WebSocket, player_id:str = Query(None)):
     await websocket.accept()
 
     world: World 
+    world_objects: list[WorldObject] = []
     with create_postgres_session() as session:
         world = WorldService.get_world_by_player_id(session, player_id)
+        world_objects = WorldService.get_world_objects_by_world_id(session, str(world.world_id))
+
+    data = WorldData(type="loadWorldObjects", world_id=str(world.world_id), objects=world_objects)
+    await websocket.send_json(data.to_json())
 
     player = await connection_service.add(player_id, websocket, str(world.world_id))
  
@@ -37,6 +43,10 @@ async def handler(websocket: WebSocket, player_id:str = Query(None)):
                 match data["type"]:
                     case "playerMove":
                         player.position =  Vector3(**data["position"])
+                    case "addWorldObjects":
+                        with create_postgres_session() as session:
+                            WorldService.add_world_objects(session, WorldData.from_json(data))
+                            session.commit()
 
                 await connection_service.broadcast(player_id, data)
     except WebSocketDisconnect as e:

@@ -19,4 +19,42 @@ class WorldObject(Base):
         CheckConstraint('array_length(scale, 1) = 3', name='check_scale_3d'),
     )
 
+    @staticmethod
+    def from_json(json: dict):
+        world_object = WorldObject()
+        world_object.world_object_id = json["worldObjectId"]
+        world_object.world_id = json["worldId"]
+        world_object.object_id = json["objectId"]
+
+        position = json["position"]
+        rotation = json["rotation"]
+        rotation = json["rotation"]
+        world_object.position = [position["x"], position["y"], position["z"]]
+        world_object.rotation = [rotation["x"], rotation["y"], rotation["z"]]
+        world_object.rotation = [rotation["x"], rotation["y"], rotation["z"]]
+
+        return world_object
+
+    def to_json(self):
+        return {
+                    "worldObjectId": self.world_object_id,
+                    "worldId": self.world_id,
+                    "objectId": self.object_id,
+                    "position": {
+                        "x": self.position[0],
+                        "y": self.position[1],
+                        "z": self.position[2]
+                    },
+                    "rotation": {
+                        "x": self.rotation[0],
+                        "y": self.rotation[1],
+                        "z": self.rotation[2]
+                    },
+                    "scale": {
+                        "x": self.scale[0],
+                        "y": self.scale[1],
+                        "z": self.scale[2]
+                    },
+                }
+
 

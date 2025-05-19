@@ -1,8 +1,9 @@
 from app.models.worlds import World
 from app.models.world_objects import WorldObject
 from app.core.id_gen import generate_id
+from app.services.connection.message_types.world_data import WorldData
+from sqlalchemy import Column
 
-from app.database.session import create_postgres_session
 
 from sqlalchemy.orm import Session
 
@@ -32,6 +33,13 @@ class WorldService():
         world_objects = WorldService.get_world_objects_by_world_id(session, world_id=str(world.world_id))
         return (world, world_objects)
     
+    @staticmethod
+    def add_world_objects(session: Session, world_data: WorldData):
+        for world_object in world_data.objects:
+            id = generate_id(WorldObject, WorldObject.world_object_id)
+            world_object.world_object_id = id #type: ignore // I dont want to refactor the old models for now
+            session.add(world_object)
+            
     @staticmethod
     def get_world_by_player_id(session: Session, player_id: str) -> World:
         return session.query(World).filter(World.owner_player_id == player_id).one()

@@ -29,4 +29,3 @@ def create_load_world_message(world_objects: list[WorldObject]):
                 "objects": [world_object_to_dict(obj) for obj in world_objects]
            }
 
-    

@@ -37,8 +37,25 @@ class WorldService():
     def add_world_objects(session: Session, world_data: WorldData):
         for world_object in world_data.objects:
             id = generate_id(WorldObject, WorldObject.world_object_id)
-            world_object.world_object_id = id #type: ignore // I dont want to refactor the old models for now
+            world_object.world_object_id = id #type: ignore
+            world_object.world_id = world_object.world_id
             session.add(world_object)
+            print(world_object.to_json())
+            print(f"Adding object {world_object.object_id}")
+     
+    @staticmethod
+    def edit_world_objects(session: Session, world_data: WorldData):
+        for world_object in world_data.objects:
+            world_object_ = session.query(WorldObject).filter(WorldObject.world_object_id == world_object.world_object_id).one()
+
+            if world_object_ is None:
+                raise Exception("Cannot edit world object that does not exist")
+        
+            world_object_.position = world_object.position
+            world_object_.rotation = world_object.rotation
+            world_object_.scale = world_object_.scale
+        
+            session.add(world_object_)
             
     @staticmethod
     def get_world_by_player_id(session: Session, player_id: str) -> World:

@@ -28,10 +28,10 @@ class WorldObject(Base):
 
         position = json["position"]
         rotation = json["rotation"]
-        rotation = json["rotation"]
+        scale = json["scale"]
         world_object.position = [position["x"], position["y"], position["z"]]
         world_object.rotation = [rotation["x"], rotation["y"], rotation["z"]]
-        world_object.rotation = [rotation["x"], rotation["y"], rotation["z"]]
+        world_object.scale = [scale["x"], scale["y"], scale["z"]]
 
         return world_object
 

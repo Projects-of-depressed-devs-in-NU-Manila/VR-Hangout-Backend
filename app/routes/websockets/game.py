@@ -44,10 +44,14 @@ async def handler(websocket: WebSocket, player_id:str = Query(None)):
                     case "playerMove":
                         player.position =  Vector3(**data["position"])
                     case "addWorldObjects":
+                        print("Adding world objects")
                         with create_postgres_session() as session:
                             WorldService.add_world_objects(session, WorldData.from_json(data))
                             session.commit()
-
+                    case "editWorldObjects":
+                        with create_postgres_session() as session:
+                            WorldService.edit_world_objects(session, WorldData.from_json(data))
+                            session.commit()
                 await connection_service.broadcast(player_id, data)
     except WebSocketDisconnect as e:
         print(f"Player {player_id} disconnected")

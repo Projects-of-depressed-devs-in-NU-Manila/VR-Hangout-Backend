@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes.websockets import game
 from app.routes.api.auth import auth 
+from app.routes.api.friendship import friendship 
 
 if app.config.initializa_db_on_run:
     from app.database.init import init
@@ -28,4 +29,5 @@ app.add_middleware(
 
 app.include_router(game.router)
 app.include_router(auth.router)
+app.include_router(friendship.router)
 

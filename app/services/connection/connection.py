@@ -2,6 +2,7 @@ from fastapi import WebSocket
 import time
 
 from app.config import default_world_id
+from app.core.vector import Vector3
 from app.services.connection.player import Player
 from app.services.connection.world import World 
 from app.services.connection.message_types.connection import create_connection_message, create_disconection_message
@@ -36,10 +37,20 @@ class ConnectionService:
         self.remove_from_world(player.current_world_id, player_id)
         self.players.pop(player_id)
 
-    def change_world(self, new_world_id: str, player_id: str):
+    async def change_world(self, new_world_id: str, player_id: str):
+        #TODO: send the player the world data use this when loading the world for the first time
+          
         old_world_id = self.players[player_id].current_world_id
+        if new_world_id == old_world_id:
+            return
+
+        self.players[player_id].current_world_id = new_world_id
+        self.players[player_id].position = Vector3() 
+        self.players[player_id].rotation = Vector3() 
         self.remove_from_world(old_world_id, player_id)
         self.add_to_world(new_world_id, player_id)
+        await self.broadcast(player_id, create_connection_message(self.players[player_id])) 
+
     
     async def broadcast(self, player_id: str, message: dict): # TODO create more functions for this but with different message types if needed
         world_id = self.players[player_id].current_world_id
@@ -50,6 +61,20 @@ class ConnectionService:
             
             player = self.players[id]
             await player.websocket.send_json(message)
+    
+    async def broadcast_voice(self, player_id: str, packet: dict):
+        player = self.players[player_id]
+        for id in self.worlds[player.current_world_id].player_ids:
+            if id == player_id:
+                continue
+ 
+            other_player = self.players[id]
+            if other_player.voice_websocket is None:
+                continue
+
+            distance = get_distance(player.position, other_player.position)
+            if distance < 8:
+                await other_player.voice_websocket.send_json(packet)
   
     def add_to_world(self, world_id: str, player_id: str):
         if world_id not in self.worlds.keys():
@@ -59,5 +84,14 @@ class ConnectionService:
 
     def remove_from_world(self, world_id: str, player_id: str):
         self.worlds[world_id].player_ids.remove(player_id)
+
+def get_distance(vec1: Vector3, vec2: Vector3):
+    import numpy as np
+
+    a = np.array([vec1.x, vec1.y, vec1.z])
+    b = np.array([vec2.x, vec2.y, vec2.z])
+
+    distance = np.linalg.norm(a - b)
+    return distance
 
 

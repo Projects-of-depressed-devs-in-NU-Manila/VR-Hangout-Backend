@@ -71,6 +71,8 @@ async def handler(websocket: WebSocket, player_id:str = Query(None)):
 
 @router.websocket("/voice")
 async def voice_handler(websocket: WebSocket, player_id: str = Query(None)):
+    await websocket.close()
+    return
     if player_id not in connection_service.players.keys():
         await websocket.close(code=4001, reason="Player Not yet connected to game server")
         return

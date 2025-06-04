@@ -1,5 +1,5 @@
 from app.core.id_gen import generate_id
-from app.core.exceptions import AlreadyExists
+from app.core.exceptions import AlreadyExists, DoesNotExists, MismatchException
 from app.models.credentials import Credential
 from sqlalchemy.orm import Session
 
@@ -15,6 +15,22 @@ class AuthService:
         session.add(credential)
         session.flush()
         return id
+
+    @staticmethod
+    def signin(session: Session, username: str, password: str):
+        credential = session.query(Credential).filter(Credential.username == username).first()
+
+        if credential is None:
+            raise DoesNotExists("Player with that name does not exists")
+        
+        if not str(credential.password) == password:
+            raise  MismatchException("Password is incorrect")
+
+        return credential
+
+
+
+         
         
 
 

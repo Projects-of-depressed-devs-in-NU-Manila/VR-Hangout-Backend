@@ -19,3 +19,9 @@ def catch_exceptions():
 class AlreadyExists(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
+
+class DoesNotExists(Exception):
+    ...
+
+class MismatchException(Exception):
+    ...

@@ -2,7 +2,7 @@ from app.routes.api.auth.request_models.signup import SignupBody
 from app.services.auth.auth import AuthService
 from app.services.account.account import PlayerService
 from app.services.world.worlds import WorldService
-from app.core.exceptions import catch_exceptions, AlreadyExists
+from app.core.exceptions import DoesNotExists, catch_exceptions, AlreadyExists
 
 from fastapi import APIRouter, HTTPException
 
@@ -30,3 +30,13 @@ async def signup(request: SignupBody):
             return {"message": "Successfully registered user"}
     except AlreadyExists as e:
         raise HTTPException(409, {"detail": str(e)})
+
+@router.post("/signin")
+@catch_exceptions()
+async def signin(request: SignupBody):
+    try:
+        with create_postgres_session() as session:
+            credentials = AuthService.signin(session, request.username, request.password)
+            return {"player_id", credentials.player_id}
+    except DoesNotExists as e:
+        raise HTTPException(494, {"error", e})

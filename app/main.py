@@ -2,6 +2,7 @@ import app.config
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.routes.api.inventory import inventory
 from app.routes.websockets import game
 from app.routes.api.auth import auth 
 from app.routes.api.friendship import friendship 
@@ -30,4 +31,5 @@ app.add_middleware(
 app.include_router(game.router)
 app.include_router(auth.router)
 app.include_router(friendship.router)
+app.include_router(inventory.router)
 

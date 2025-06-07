@@ -54,8 +54,7 @@ async def handler(websocket: WebSocket, player_id:str = Query(None)):
                             session.commit()
                     case "changeWorld":
                         await connection_service.change_world(data["worldId"], player_id)
-                        continue
-                        
+                        continue # do not broadcast
 
                 await connection_service.broadcast(player_id, data)
     except WebSocketDisconnect as e:

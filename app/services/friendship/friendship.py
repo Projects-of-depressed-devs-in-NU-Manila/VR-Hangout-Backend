@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from app.core.exceptions import AlreadyExists, DoesNotExists
 from app.core.id_gen import generate_id
+from app.models.credentials import Credential
 from app.models.friends import Friendship
 from app.models.players import Player
 
@@ -27,6 +28,8 @@ class FriendshipService():
     @staticmethod
     def get_friends(session: Session, player_id: str):
         friends = session.query(Friendship).filter(Friendship.player_id1 == player_id).all()
+        friends = session.query(Credential).filter(Credential.player_id.in_([friend.player_id2 for friend in friends])).all()
+
         return friends
      
     @staticmethod

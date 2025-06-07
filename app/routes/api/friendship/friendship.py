@@ -33,7 +33,9 @@ async def get_friend_list(player_id: str = Query(None)):
     
     with create_postgres_session() as session:
         friendships = FriendshipService.get_friends(session, player_id)
-        return [friendship.player_id2 for friendship in friendships] 
+        return {
+            "friends": [ {"player_name": friendship.username, "player_id": friendship.player_id } for friendship in friendships]
+        } 
 
 @router.delete("/")
 @catch_exceptions()

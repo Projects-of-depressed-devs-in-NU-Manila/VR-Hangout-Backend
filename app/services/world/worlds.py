@@ -31,7 +31,15 @@ class WorldService():
     def load_player_world(session: Session, player_id: str):
         world = WorldService.get_world_by_player_id(session, player_id)
         world_objects = WorldService.get_world_objects_by_world_id(session, world_id=str(world.world_id))
-        return (world, world_objects)
+        data = WorldData(type="loadWorldObjects", world_id=str(world.world_id), objects=world_objects)
+        return data
+    
+    @staticmethod
+    def load_world(session: Session, world_id: str):
+        world = session.query(World).filter(World.world_id == world_id).one()
+        world_objects = WorldService.get_world_objects_by_world_id(session, world_id=str(world.world_id))
+        data = WorldData(type="loadWorldObjects", world_id=str(world.world_id), objects=world_objects)
+        return data
     
     @staticmethod
     def add_world_objects(session: Session, world_data: WorldData):

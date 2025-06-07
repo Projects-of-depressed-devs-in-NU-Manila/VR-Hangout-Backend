@@ -25,14 +25,9 @@ async def handler(websocket: WebSocket, player_id:str = Query(None)):
 
     await websocket.accept()
 
-    world: World 
-    world_objects: list[WorldObject] = []
     with create_postgres_session() as session:
-        world = WorldService.get_world_by_player_id(session, player_id)
-        world_objects = WorldService.get_world_objects_by_world_id(session, str(world.world_id))
-
-    data = WorldData(type="loadWorldObjects", world_id=str(world.world_id), objects=world_objects)
-    await websocket.send_json(data.to_json())
+        world = WorldService.load_player_world(session, player_id)
+        await websocket.send_json(world.to_json())
 
     player = await connection_service.add(player_id, websocket, str(world.world_id))
   
@@ -55,6 +50,14 @@ async def handler(websocket: WebSocket, player_id:str = Query(None)):
                     case "changeWorld":
                         await connection_service.change_world(data["worldId"], player_id)
                         continue # do not broadcast
+                    case "goToPlayerWorld":
+                        await connection_service.change_world(world.world_id, player_id)
+                        continue # do not broadcast
+                    case "goToHub":
+                        await connection_service.go_to_hub(player_id)
+                        await websocket.send_json(data)
+                        print("Debug: going to hub")
+                        continue
 
                 await connection_service.broadcast(player_id, data)
     except WebSocketDisconnect as e:

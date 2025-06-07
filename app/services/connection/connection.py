@@ -37,20 +37,51 @@ class ConnectionService:
         self.remove_from_world(player.current_world_id, player_id)
         self.players.pop(player_id)
 
-    async def change_world(self, new_world_id: str, player_id: str):
-        #TODO: send the player the world data use this when loading the world for the first time
-          
+    async def go_to_hub(self, player_id: str):
+        player = self.players[player_id]
+
         old_world_id = self.players[player_id].current_world_id
-        if new_world_id == old_world_id:
+        if "hub" == old_world_id:
             return
 
-        self.players[player_id].current_world_id = new_world_id
+        self.players[player_id].current_world_id = "hub" 
         self.players[player_id].position = Vector3() 
         self.players[player_id].rotation = Vector3() 
         self.remove_from_world(old_world_id, player_id)
-        self.add_to_world(new_world_id, player_id)
+        self.add_to_world("hub", player_id)
+
+        if player.current_world_id in self.worlds.keys():
+            for id in self.worlds[player.current_world_id].player_ids:
+                await player.websocket.send_json(create_connection_message(self.players[id])) if id != player_id else ...
+
         await self.broadcast(player_id, create_connection_message(self.players[player_id])) 
 
+    async def change_world(self, new_world_id: str, player_id: str):
+        #TODO: send the player the world data use this when loading the world for the first time
+        try:
+            player = self.players[player_id]
+            
+            old_world_id = self.players[player_id].current_world_id
+            if new_world_id == old_world_id:
+                return
+
+            self.players[player_id].current_world_id = new_world_id
+            self.players[player_id].position = Vector3() 
+            self.players[player_id].rotation = Vector3() 
+            self.remove_from_world(old_world_id, player_id)
+            self.add_to_world(new_world_id, player_id)
+
+            with create_postgres_session() as session:
+                data = WorldService.load_world(session, player.current_world_id)
+                await player.websocket.send_json(data.to_json())
+
+            if player.current_world_id in self.worlds.keys():
+                for id in self.worlds[player.current_world_id].player_ids:
+                    await player.websocket.send_json(create_connection_message(self.players[id])) if id != player_id else ...
+
+            await self.broadcast(player_id, create_connection_message(self.players[player_id])) 
+        except Exception as e:
+            print(e)
     
     async def broadcast(self, player_id: str, message: dict): # TODO create more functions for this but with different message types if needed
         world_id = self.players[player_id].current_world_id

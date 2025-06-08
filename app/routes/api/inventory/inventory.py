@@ -29,7 +29,9 @@ async def get_player_inventory(player_id: str = Query(None)):
     try:
         with create_postgres_session() as session:
             inventories = InventoryService.get(session, player_id)
-            return inventories
+            return {
+                "items": inventories
+            }
     except DoesNotExists as e:
         raise HTTPException(404, {"error", str(e)})
 

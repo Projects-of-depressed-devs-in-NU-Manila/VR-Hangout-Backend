@@ -91,6 +91,8 @@ class ConnectionService:
                 continue
             
             player = self.players[id]
+            print(f"sending message to: {player.id}")
+            print(f"Message: {message}")
             await player.websocket.send_json(message)
     
     async def broadcast_voice(self, player_id: str, packet: dict):

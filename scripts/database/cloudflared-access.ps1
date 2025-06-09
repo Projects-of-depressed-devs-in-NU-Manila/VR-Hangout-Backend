@@ -6,7 +6,7 @@ $pgPort = "5433"
 
 Remove-Item $pgOutput, $pgError -ErrorAction SilentlyContinue
 
-$pg = Start-Process -FilePath "cloudflared" -ArgumentList "access tcp --hostname postgres.cottonbuds.org --url localhost:$pgPort" `
+$pg = Start-Process -FilePath "cloudflared" -ArgumentList "access tcp --hostname postgres.cottonbuds.dev --url localhost:$pgPort" `
     -RedirectStandardOutput $pgOutput -RedirectStandardError $pgError -NoNewWindow -PassThru
 
 Write-Host "`nPostgres running on port ($pgPort)" -ForegroundColor Blue 

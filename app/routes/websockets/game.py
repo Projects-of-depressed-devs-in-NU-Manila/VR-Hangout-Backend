@@ -58,10 +58,11 @@ async def handler(websocket: WebSocket, player_id:str = Query(None)):
                         await websocket.send_json(data)
                         print("Debug: going to hub")
                         continue
-
+                
                 await connection_service.broadcast(player_id, data)
     except WebSocketDisconnect as e:
         print(f"Player {player_id} disconnected")
+        await websocket.close()
     except Exception as e:
         print(traceback.format_exc())
         print(e)
@@ -69,7 +70,6 @@ async def handler(websocket: WebSocket, player_id:str = Query(None)):
     finally:
         await connection_service.remove(player_id)
         print("Current Players: ", len(connection_service.players))
-        await websocket.close()
 
 @router.websocket("/voice")
 async def voice_handler(websocket: WebSocket, player_id: str = Query(None)):

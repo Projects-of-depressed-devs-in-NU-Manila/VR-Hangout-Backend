@@ -14,7 +14,7 @@ router = APIRouter(prefix="/game", tags=["Game Websocket"])
 connection_service = ConnectionService()
 
 @router.websocket("/ws")
-async def handler(websocket: WebSocket, player_id:str = Query(None)):
+async def handler(websocket: WebSocket, player_id:str = Query(None), avatar_name: str = Query("Bartender")):
     if player_id == None:
         await websocket.close(code=4000)
         return
@@ -29,7 +29,7 @@ async def handler(websocket: WebSocket, player_id:str = Query(None)):
         world = WorldService.load_player_world(session, player_id)
         await websocket.send_json(world.to_json())
 
-    player = await connection_service.add(player_id, websocket, str(world.world_id))
+    player = await connection_service.add(player_id, websocket, str(world.world_id), avatar_name)
   
     try:
         while True:

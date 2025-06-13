@@ -14,7 +14,7 @@ class AuthService:
         credential = Credential(credential_id=id, username=username, password=password, player_id=player_id)
         session.add(credential)
         session.flush()
-        return id
+        return credential
 
     @staticmethod
     def signin(session: Session, username: str, password: str):

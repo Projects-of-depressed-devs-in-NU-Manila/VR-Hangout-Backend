@@ -16,8 +16,8 @@ class ConnectionService:
     worlds: dict[str, World] = {}# key: world_id 
     players: dict[str, Player] = {}# key: player_id 
 
-    async def add(self, player_id: str, websocket: WebSocket, world_id: str = default_world_id):
-        player = Player(websocket, player_id, world_id)
+    async def add(self, player_id: str, websocket: WebSocket, world_id: str = default_world_id, avatar_name: str = "Bartender"):
+        player = Player(websocket, player_id, world_id, avatar_name)
         self.players[player_id] = player
 
         if world_id in self.worlds.keys():
@@ -91,8 +91,6 @@ class ConnectionService:
                 continue
             
             player = self.players[id]
-            print(f"sending message to: {player.id}")
-            print(f"Message: {message}")
             await player.websocket.send_json(message)
     
     async def broadcast_voice(self, player_id: str, packet: dict):
